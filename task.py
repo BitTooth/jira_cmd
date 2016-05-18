@@ -1,4 +1,6 @@
 import os
+import webbrowser
+from config import jira_url
 
 # Using cecho for colored output
 # http://www.codeproject.com/Articles/17033/Add-Colors-to-Batch-Files
@@ -39,6 +41,12 @@ class JiraTask:
 	def summary(self):
 		return self.__json["fields"]["summary"]
 
+	def assignee(self):
+		if self.__json["fields"]["assignee"] is not None:
+			return self.__json["fields"]["assignee"]["displayName"]
+		else:
+			return "Unassigned"
+
 	def key(self):
 		return self.__json["key"]
 
@@ -51,7 +59,27 @@ class JiraTask:
 	def status(self):
 		return self.__json["fields"]["status"]
 
+	def description(self):
+		return self.__json["fields"]["description"]
+
+	def openInBrowser(self):
+		webbrowser.open_new_tab(jira_url + "browse/" + self.__json["key"])
+
+	def printDetailed(self):
+		os.system(cecho + 
+			coloredKey(self.key(), self.issuetype()) + "\t" + 
+			self.summary().encode("UTF-8") + "\t" + 
+			coloredStatus(self.status()) + "\t")
+		print "\nAssignee:\t", self.assignee()
+		print ''
+		print self.description()
+
+
 	def out(self):
 #		print coloredKey(self.key(), self.issuetype()), "\t", repr(self.summary()).ljust(65).encode("UTF-8"), "\t", coloredStatus(self.status())
-		os.system(cecho + coloredKey(self.key(), self.issuetype()) + "\t" + repr(self.summary()).ljust(65).encode("UTF-8") + "\t" + coloredStatus(self.status()))
+		os.system(cecho + 
+			coloredKey(self.key(), self.issuetype()) + "\t" + 
+			repr(self.summary()).ljust(65).encode("UTF-8") + "\t" + 
+			coloredStatus(self.status()) + "\t" +
+			self.assignee())
 		print ''

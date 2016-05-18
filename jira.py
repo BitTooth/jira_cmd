@@ -4,6 +4,7 @@ import json
 from task import *
 import sys
 from config import login, password, jira_url, custom_names
+from cache import saveToCache, loadFromCache
 
 r.packages.urllib3.disable_warnings()
 
@@ -13,7 +14,8 @@ basic_url = jira_url + "/rest/api/2/"
 commands = {
 	'anphd':' project = "ANPHD" ',
 	'me':' assignee="' + login + '"',
-	'open':' status not in ("Back Log", DONE, Closed, Resolved) ',
+	'open':' status in ("In Progress", "To Do") ',
+	'test':' status = Testing',
 	'bl':' status = "Back Log" ',
 	'pr':' component in (Programming, "Programming - Build", "Programming - Game Assets", "Programming - Game Mechanics", "Programming - Online: Client ", "Programming - Online: Server ", "Programming - Optimization", "Programming - Scripts", "Programming - Tools/Libs", "Programming - Tracking/Antihacking", "Programming - UI") ',
 	'and':' AND ',
@@ -31,18 +33,24 @@ def printHelp():
 
 def getAndPrintTasks(jql):
 	params = {
-		'jql':jql
+		'jql':jql + " ORDER BY Status"
 	}
 
 	resp = r.get(basic_url + 'search', params=params, auth=auth, verify=False)
 	data = json.loads(resp.text)
 
-	#print data
+	if not "issues" in data:
+		print "Some error occured"
+		print data
+		return
 
+	#print data
 	tasks = []
 	for task in data["issues"]:
 		temp = JiraTask(task)
 		tasks.append(temp)
+
+	saveToCache(data)
 
 	#print json.dumps(data["issues"][0], indent=4, sort_keys=True)
 	if len(tasks) > 0:
@@ -86,6 +94,37 @@ def parseJql():
 			return
 	getAndPrintTasks(jql)
 
+def viewTask():
+	useBrowser = False
+	taskNum = None
+
+	if len(sys.argv) < 3:
+		print 'Usage: jira view [-b] TASK_NUM'
+		print 'Params:'
+		print '-b\tUse browser to use task'
+		return
+
+	for param in sys.argv[2:-1]:
+		if param == '-b': useBrowser = True
+		else: 
+			print 'Unknown param', param
+			return
+
+	taskNum = int(sys.argv[-1])
+	if taskNum is not None:
+		tasks = loadFromCache()
+		if taskNum < 0 or taskNum >= len(tasks):
+			print "Wrong task index", taskNum, "there are only", len(tasks), "in cache"
+			return
+
+		task = tasks[taskNum]
+		if useBrowser:
+			task.openInBrowser()
+		else:
+			print task.printDetailed()
+
+
+
 
 
 if __name__ == '__main__':	
@@ -95,6 +134,7 @@ if __name__ == '__main__':
 		exit()
 
 	arg = sys.argv[1]
+	# search for tasks requests
 	if arg == 'me_all': printMyTasks()
 	elif arg == 'me': printMyOpenedTasks()
 	elif arg == 'anphd_bl': printAnphdBacklog()
@@ -102,4 +142,9 @@ if __name__ == '__main__':
 	elif arg == 'anphd_pr' : printProgrammingOpened()
 	elif arg == 'anphd_pr_bl': printProgrammingBacklog()
 	elif arg == 'jql' : parseJql()
+
+	# task view requests
+	elif arg == 'view' : viewTask()
+
+	# help
 	elif arg == 'help': printHelp()

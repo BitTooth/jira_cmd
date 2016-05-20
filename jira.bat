@@ -1,2 +1,2 @@
 echo OFF
-call python jira.py %*
+call python %JIRA_CMD%/jira.py %*

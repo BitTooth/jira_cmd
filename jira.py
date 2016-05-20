@@ -16,6 +16,8 @@ commands = {
 	'me':' assignee="' + login + '"',
 	'open':' status in ("In Progress", "To Do") ',
 	'test':' status = Testing',
+	'done':' status = DONE',
+	'review':' status = "In Review"',
 	'bl':' status = "Back Log" ',
 	'pr':' component in (Programming, "Programming - Build", "Programming - Game Assets", "Programming - Game Mechanics", "Programming - Online: Client ", "Programming - Online: Server ", "Programming - Optimization", "Programming - Scripts", "Programming - Tools/Libs", "Programming - Tracking/Antihacking", "Programming - UI") ',
 	'and':' AND ',
@@ -122,10 +124,6 @@ def viewTask():
 			task.openInBrowser()
 		else:
 			print task.printDetailed()
-
-
-
-
 
 if __name__ == '__main__':	
 

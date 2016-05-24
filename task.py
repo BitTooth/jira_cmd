@@ -63,7 +63,7 @@ class JiraTask:
 		return self.__json["fields"]["description"]
 
 	def openInBrowser(self):
-		webbrowser.open_new_tab(jira_url + "browse/" + self.__json["key"])
+		webbrowser.open_new_tab(jira_url + "/browse/" + self.__json["key"])
 
 	def printDetailed(self):
 		os.system(cecho + 

@@ -125,6 +125,9 @@ def viewTask():
 		else:
 			print task.printDetailed()
 
+def openJiraProject():                  	
+	webbrowser.open_new_tab(jira_url + "/secure/Dashboard.jspa")
+
 if __name__ == '__main__':	
 
 	if len(sys.argv) == 1:
@@ -139,6 +142,7 @@ if __name__ == '__main__':
 	elif arg == 'anphd' : printAllAnphdOpened()
 	elif arg == 'anphd_pr' : printProgrammingOpened()
 	elif arg == 'anphd_pr_bl': printProgrammingBacklog()
+	elif arg == 'open': openJiraProject()
 	elif arg == 'jql' : parseJql()
 
 	# task view requests
